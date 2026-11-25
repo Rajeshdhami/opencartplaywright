@@ -7,7 +7,7 @@ from utils.data_reader_util import *
 import pytest
 
 #csv_data= read_csv_data("../testdata/logindata.csv")
-read_json_data = read_json_data("../testdata/logindata.json")
+read_json_data = read_json_data("testdata/logindata.json")
 
 @pytest.mark.datadriven
 @pytest.mark.parametrize("testName,email,password,expected",read_json_data)
