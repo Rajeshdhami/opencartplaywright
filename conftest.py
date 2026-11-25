@@ -83,8 +83,8 @@ def browser_context(request):
     headed_flag = get_config_value(request.config, "headed")
     video_option = get_config_value(request.config, "video")
 
-    print(f"🎯 Starting browser: {browser_name}")
-    print(f"🎯 Headless mode: {not headed_flag} (headed={headed_flag})")
+    print(f" Starting browser: {browser_name}")
+    print(f" Headless mode: {not headed_flag} (headed={headed_flag})")
 
     # Start Playwright
     playwright = sync_playwright().start()
@@ -97,7 +97,7 @@ def browser_context(request):
     elif browser_name.lower() == "webkit":
         browser = playwright.webkit.launch(headless=not headed_flag)
     else:
-        raise ValueError(f"❌ Unsupported browser: {browser_name}")
+        raise ValueError(f" Unsupported browser: {browser_name}")
 
         # Create a browser context (optionally with video recording)
     if video_option in ["on", "retain-on-failure"]:
@@ -109,7 +109,7 @@ def browser_context(request):
     yield context
 
     # Clean up after the test
-    print("🧹 Closing browser context and stopping Playwright...")
+    print(" Closing browser context and stopping Playwright...")
     context.close()
     browser.close()
     playwright.stop()
@@ -133,11 +133,11 @@ def page(request, browser_context):
     tracing_option = get_config_value(request.config, "tracing")
     video_option = get_config_value(request.config, "video")
 
-    print(f"🌐 Navigating to: {base_url}")
+    print(f" Navigating to: {base_url}")
 
     # Start tracing if enabled
     if tracing_option in ["on", "retain-on-failure"]:
-        print("📹 Tracing enabled - capturing screenshots and actions")
+        print(" Tracing enabled - capturing screenshots and actions")
         browser_context.tracing.start(screenshots=True, snapshots=True, sources=True)
 
         # Create and navigate to base URL
@@ -153,13 +153,13 @@ def page(request, browser_context):
     test_name = request.node.name
     test_failed = hasattr(request.node, "rep_call") and request.node.rep_call.failed
 
-    print(f"📊 Test '{test_name}' result: {'❌ FAILED' if test_failed else '✅ PASSED'}")
+    print(f" Test '{test_name}' result: {' FAILED' if test_failed else 'PASSED'}")
 
     # Save and attach trace
     if tracing_option in ["on", "retain-on-failure"]:
         trace_path = f"reports/traces/{test_name}_trace.zip"
         browser_context.tracing.stop(path=trace_path)
-        print(f"💾 Trace saved: {trace_path}")
+        print(f"Trace saved: {trace_path}")
 
         # Attach trace to Allure report if test failed
         # Currently ZIP file is not supporting to attach in allure reports
@@ -169,13 +169,13 @@ def page(request, browser_context):
         #         name=f"{test_name}_trace",
         #         attachment_type=allure.attachment_type.ZIP
         #     )
-        #     print("📎 Trace attached to Allure report")
+        #     print(" Trace attached to Allure report")
 
     # Take screenshot if test failed
     if test_failed and screenshot_option in ["on", "only-on-failure"]:
         screenshot_path = f"reports/screenshots/{test_name}.png"
         page.screenshot(path=screenshot_path)
-        print(f"📸 Screenshot saved: {screenshot_path}")
+        print(f" Screenshot saved: {screenshot_path}")
 
         # Attach to Allure report
         allure.attach.file(
@@ -183,7 +183,7 @@ def page(request, browser_context):
             name=f"{test_name}_screenshot",
             attachment_type=allure.attachment_type.PNG
         )
-        print("📎 Screenshot attached to Allure report")
+        print(" Screenshot attached to Allure report")
 
         # Attach video if available and test failed
     if test_failed and video_option in ["on", "retain-on-failure"]:
@@ -194,4 +194,4 @@ def page(request, browser_context):
                 name=f"{test_name}_video",
                 attachment_type=allure.attachment_type.WEBM
             )
-            print("🎥 Video attached to Allure report")
+            print(" Video attached to Allure report")
